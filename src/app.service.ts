@@ -1,21 +1,19 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { BussinessFormatConfig } from './entities/bussinessFormatConfig.entity';
+import { Injectable, Logger } from '@nestjs/common';
 import { PayInstruction } from './entities/payInstruction.entity';
 import { BussinessFormatConfigService } from './services/BussinessFormatConfig.service';
 import { fileDto } from './dto/fileDto';
-import { readFileSync } from 'fs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Decimal128, Double, Repository } from 'typeorm';
-import { MessagePayInstructionDto } from './dto/messagePayInstructionDto';
-import { RedisService } from './services/redis.service';
+import { Repository } from 'typeorm';
+import { KeyvService } from './services/keyv.service';
+
 
 @Injectable()
 export class AppService {
   constructor(
       private readonly appBussinessFormatConfig: BussinessFormatConfigService,
-      private readonly redisService: RedisService,
+      private readonly keyvService: KeyvService,
       @InjectRepository(PayInstruction)
-      private payInstructionRepository: Repository<PayInstruction>,
+      private readonly payInstructionRepository: Repository<PayInstruction>,
   ) {}
   logger = new Logger('AppService');
   
@@ -86,18 +84,18 @@ async getPayInstruction(id: number): Promise<PayInstruction | null>{
     
     const cacheKey = `payInstruction:${id}`;
     //Consulta a cache
-    const cached = await this.redisService.get(cacheKey);
+    const cached = await this.keyvService.get<PayInstruction>(cacheKey);
 
     if (cached) {
         this.logger.log("[getPayInstruction]: Pay instruction: "+id+ " get cache")
-        return JSON.parse(cached); // retorna desde Redis
+        return cached; // retorna desde Redis
     }
 
     const pi = await this.payInstructionRepository.findOneBy({ id });
     if(pi){
         //Guardar en cache
-        await this.redisService.set(cacheKey, pi, 60);
-        this.logger.log("[getPayInstruction]: Pay instruction: "+id+ " found")
+        await this.keyvService.set(cacheKey, pi, 60000);
+        this.logger.log("[getPayInstruction]: Pay instruction: "+id+ " found in data base")
     }else{
         this.logger.log("[getPayInstruction]: Pay instruction: "+id+ " not found");
     }

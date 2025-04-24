@@ -1,8 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Ctx, MessagePattern, NatsContext, Payload } from '@nestjs/microservices';
 import { PayInstruction } from './entities/payInstruction.entity';
 import { fileDto } from './dto/fileDto';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller()
 export class AppController {
@@ -27,6 +28,9 @@ export class AppController {
     return this.appService.getHello2(hello);
   }
 
+  /*@UseInterceptors(CacheInterceptor)
+  @CacheKey('payinstruction')
+  @CacheTTL(60) // override TTL to 30 seconds*/
   @MessagePattern({ cmd: 'getPayInstruction' })
   getPayInstruction(@Payload() id: number, @Ctx() context: NatsContext): Promise<PayInstruction>{
     //console.log('Subject: '+context.getSubject.name); // e.g. "time.us.east"

@@ -4,14 +4,13 @@ import { AppService } from './app.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { BussinesFormatConfigModule } from './modules/bussinessFormatConfig.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { BussinessFormatConfigService } from './services/BussinessFormatConfig.service';
 import { DataSource } from 'typeorm';
 import { PayInstructionModule } from './modules/payInstruction.module';
-import { RedisService } from './services/redis.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RedisModule } from './modules/redis.module';
+import { ConfigModule } from '@nestjs/config';
 import { OrmModule } from './modules/typeOrm.module';
+import { KeyvModule } from './modules/keyv.module';
+import { KeyvService } from './services/keyv.service';
 
 @Module({
   imports: [
@@ -26,11 +25,11 @@ import { OrmModule } from './modules/typeOrm.module';
     }),
     BussinesFormatConfigModule,
     PayInstructionModule,
-    RedisModule,
-    OrmModule
+    OrmModule,
+    KeyvModule
    ],
   controllers: [AppController],
-  providers: [AppService, BussinessFormatConfigService, RedisService]
+  providers: [AppService, BussinessFormatConfigService, KeyvService]
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
