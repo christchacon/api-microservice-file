@@ -11,7 +11,7 @@ export class KeyvService {
     const redisOptions = {
         url: uri, // The Redis server URL (use 'rediss' for TLS)
         //password: 'your_password', // Optional password if Redis has authentication enabled
-      
+        namespace: 'my-namespace',
         socket: {
           host: process.env.REDIS_HOST, // Hostname of the Redis server
           port: parseInt(process.env.REDIS_PORT),        // Port number
